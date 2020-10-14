@@ -1,2 +1,2 @@
-# api
+# Covario API
 Covario API Examples
