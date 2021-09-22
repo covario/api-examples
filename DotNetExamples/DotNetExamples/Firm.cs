@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace DotNetExamples
 {
@@ -25,23 +26,25 @@ namespace DotNetExamples
             Guid Id,
             string Type);
 
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true,
+        };
+
         public static async Task<int> GetFirmInfo()
         {
             var token = Program.ReadToken();
             var response = await Constants.ApiBaseUrl
-                .AppendPathSegments("v2", "firm")
+                .AppendPathSegments("api", "firm")
                 .WithHeaders(new
                 {
                     Authorization = $"Bearer {token}"
                 })
-                .PostAsync();
+                .GetAsync();
 
-            var firm = JsonSerializer.Deserialize<FirmModel>(await response.GetStringAsync());
-
-            Console.WriteLine(JsonSerializer.Serialize(firm, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
+            var firm = JsonSerializer.Deserialize<FirmModel>(await response.GetStringAsync(), JsonOptions);
+            Console.WriteLine(JsonSerializer.Serialize(firm, JsonOptions));
 
             return 0;
         }
